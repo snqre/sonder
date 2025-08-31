@@ -2,18 +2,18 @@ use ::dioxus::prelude::*;
 use ::gloo_timers::callback as cb;
 use ::std::collections as ds;
 
+use engine::Tick as _;
+use component::*;
+
 mod common;
 mod component;
+mod engine;
 mod galaxy;
-mod game;
 mod location;
 mod market;
 mod name;
+mod population;
 mod uuid;
-
-
-
-
 
 #[derive(Debug)]
 #[derive(Clone)]
@@ -58,14 +58,7 @@ fn Home() -> Element {
             let _ = cb::Interval::new(1000, {
                 let mut points: Signal<_> = points.to_owned();
                 move || {
-                    let mut new_points: Vec<(f64, f64)> = points();
-                    
-
-                    let last = new_points.last().unwrap();
-                    let new_t = last.0 + 1.0;
-                    let new_p = last.1 * 1.1;
-                    new_points.push((new_t, new_p));
-                    s.set(new_points);
+                    engine::update();
                 }
             });
         }
@@ -87,77 +80,4 @@ fn Home() -> Element {
             }
         }
     )
-}
-
-
-
-
-// resources
-// - credit
-// - 
-
-
-
-
-pub struct Game {
-    pool: Pool
-}
-
-
-pub struct PlayerCompany {
-    balance: f64
-}
-
-
-pub struct Planet {
-
-}
-
-
-pub struct Pool {
-    assets: f64,
-    supply: f64,
-}
-
-impl Pool {
-    pub fn new(initial_price: f64) -> Self {
-
-    }
-
-    pub fn buy(&self) {
-
-    }
-
-    pub fn add_liquidity(&mut self, supply_in: f64) {
-        self.assets = ;
-        self.supply = self.supply + ;
-    }
-
-    pub fn remove_liquidity(&mut self, supply_in: f64) {
-        
-    }
-
-    pub fn price(&self) -> f64 {
-        self.assets / self.supply
-    }
-}
-
-
-
-
-pub trait Trader {
-
-}
-
-#[derive(Debug)]
-#[derive(Clone)]
-pub struct Investor {
-    pub income: f64,
-    pub balance: f64,
-}
-
-impl Investor {
-    pub fn sentiment(&self) {
-        ::fastrand::f64();
-    }
 }

@@ -391,6 +391,13 @@ enum Suffix {
 #[derive(Copy)]
 #[derive(PartialEq)]
 #[derive(Eq)]
+#[derive(::strum_macros::Display)]
+#[derive(::strum_macros::IntoStaticStr)]
+#[derive(::strum_macros::EnumCount)]
+#[derive(::strum_macros::EnumIter)]
+#[derive(::strum_macros::EnumString)]
+#[derive(::strum_macros::EnumIs)]
+#[derive(::strum_macros::VariantArray)]
 pub enum Target {
     Asteroid,
     BlackHole,

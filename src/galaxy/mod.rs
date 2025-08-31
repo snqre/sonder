@@ -1,4 +1,6 @@
 use super::*;
+use location::*;
+use strum::VariantArray;
 
 static SPRITE_URLS: [Asset; 8] = [
     asset!("asset/location/galaxy-0.gif"),
@@ -12,15 +14,16 @@ static SPRITE_URLS: [Asset; 8] = [
 ];
 
 pub trait CelestialBody {
-    fn name(&self) -> name::Name;
-    fn population(&self) -> f64;
-    fn population_change_rate(&self) -> f64;
+    /// `1.0` means there is `100%` chance this will spawn
+    fn spawn_multiplier(&self) -> f64;
+    fn name(&self) -> &name::Name;
+    fn population(&self) -> &population::Population;
 }
 
 pub struct Galaxy {
     name: name::Name,
     sprite_url: Asset,
-    children: Vec<Box<dyn CelestialBody>>
+    celestial_bodies: Vec<Box<dyn CelestialBody>>
 }
 
 impl Galaxy {
@@ -29,10 +32,19 @@ impl Galaxy {
         let choice: u16 = choice.round() as u16;
         let sprite_url: Asset = SPRITE_URLS[choice as usize];
         let name: name::Name = name::Name::random(name::Target::Galaxy);
+        let celestial_bodies: Vec<Box<dyn CelestialBody>> = vec!();
+        for _ in 0..=10 {
+            let choice: f64 = name::Target::VARIANTS.len() as f64 * ::fastrand::f64();
+            let choice: usize = choice.round() as usize;
+            let target: name::Target = name::Target::VARIANTS[choice];
+            match target {
+                name::Target::Asteroid
+            }
+        }
         Self {
             name, 
             sprite_url,
-            children
+            celestial_bodies
         }
     }
 }
@@ -40,5 +52,11 @@ impl Galaxy {
 impl common::Sprite for Galaxy {
     fn sprite_url(&self) -> Asset {
         self.sprite_url
+    }
+}
+
+impl common::Update for Galaxy {
+    fn update(&mut self) {
+        
     }
 }

@@ -38,7 +38,7 @@ pub fn Resource(
                         font-family: br cobane;
                         font-weight: normal;
                     "#,
-                    { format!("{}", count) }
+                    
                 )
             }
         }

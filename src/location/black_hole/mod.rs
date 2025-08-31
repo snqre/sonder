@@ -9,8 +9,7 @@ static SPRITE_URLS: [Asset; 3] = [
 pub struct BlackHole {
     sprite_url: Asset,
     name: name::Name,
-    population: f64,
-    population_change_rate: f64
+    population: Box<population::Population>
 }
 
 impl BlackHole {
@@ -19,13 +18,11 @@ impl BlackHole {
         let choice: usize = choice as usize;
         let sprite_url: Asset = SPRITE_URLS[choice];
         let name: name::Name = name::Name::random(name::Target::Asteroid);
-        let population: f64 = 0.0;
-        let population_change_rate: f64 = 0.0;
+        let population: Box<_> = population::Population::new(0, -1000.0);
         Self {
             sprite_url,
             name,
-            population,
-            population_change_rate
+            population
         }
     }
 }
@@ -37,15 +34,15 @@ impl common::Sprite for BlackHole {
 }
 
 impl galaxy::CelestialBody for BlackHole {
-    fn name(&self) -> name::Name {
-        self.name.to_owned()
+    fn spawn_multiplier(&self) -> f64 {
+        0.9
     }
 
-    fn population(&self) -> f64 {
-        self.population
+    fn name(&self) -> &name::Name {
+        &self.name
     }
 
-    fn population_change_rate(&self) -> f64 {
-        self.population_change_rate
+    fn population(&self) -> &population::Population {
+        &self.population
     }
 }
