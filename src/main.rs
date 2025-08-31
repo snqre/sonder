@@ -1,6 +1,8 @@
 use ::dioxus::prelude::*;
 use ::gloo_timers::callback as cb;
 use ::std::collections as ds;
+use ::std::rc::Rc;
+use ::std::cell::RefCell;
 
 use engine::Tick as _;
 use component::*;
@@ -14,6 +16,8 @@ mod market;
 mod name;
 mod population;
 mod uuid;
+
+type Rbox<T> = Rc<RefCell<Box<T>>>;
 
 #[derive(Debug)]
 #[derive(Clone)]

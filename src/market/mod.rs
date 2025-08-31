@@ -16,9 +16,7 @@ pub struct Market {
 
 impl Market {
     pub fn new() -> Builder {
-        Builder {
-            ..Default::default()
-        }
+        Builder::new()
     }
 
     pub fn balance_of(&self, wallet: &uuid::Uuid) -> f64 {

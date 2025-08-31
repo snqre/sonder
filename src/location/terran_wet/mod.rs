@@ -9,7 +9,7 @@ static SPRITE_URLS: [Asset; 3] = [
 pub struct TerranWet {
     sprite_url: Asset,
     name: name::Name,
-    population: Box<population::Population>
+    population: Rbox<population::Population>
 }
 
 impl TerranWet {
@@ -18,7 +18,7 @@ impl TerranWet {
         let choice: usize = choice as usize;
         let sprite_url: Asset = SPRITE_URLS[choice];
         let name: name::Name = name::Name::random(name::Target::Asteroid);
-        let population: Box<_> = population::Population::new(0, -1000.0);
+        let population: Rbox<_> = population::Population::new(0, -1000.0);
         Self {
             sprite_url,
             name,
@@ -42,7 +42,7 @@ impl galaxy::CelestialBody for TerranWet {
         &self.name
     }
 
-    fn population(&self) -> &population::Population {
-        &self.population
+    fn population(&self) -> Rbox<population::Population> {
+        self.population.to_owned()
     }
 }

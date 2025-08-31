@@ -9,7 +9,7 @@ static SPRITE_URLS: [Asset; 3] = [
 pub struct Islands {
     sprite_url: Asset,
     name: name::Name,
-    population: Box<population::Population>
+    population: Rbox<population::Population>
 }
 
 impl Islands {
@@ -18,7 +18,7 @@ impl Islands {
         let choice: usize = choice as usize;
         let sprite_url: Asset = SPRITE_URLS[choice];
         let name: name::Name = name::Name::random(name::Target::Asteroid);
-        let population: Box<_> = population::Population::new(::fastrand::u128(1_000_000_000..=8_000_000_000), 1.0025);
+        let population: Rbox<_> = population::Population::new(::fastrand::u128(1_000_000_000..=8_000_000_000), 1.0025);
         Self {
             sprite_url,
             name,
@@ -42,7 +42,7 @@ impl galaxy::CelestialBody for Islands {
         &self.name
     }
 
-    fn population(&self) -> &population::Population {
-        &self.population
+    fn population(&self) -> Rbox<population::Population> {
+        self.population.to_owned()
     }
 }

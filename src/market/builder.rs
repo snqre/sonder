@@ -13,6 +13,12 @@ pub struct Builder {
 }
 
 impl Builder {
+    pub fn new() -> Self {
+        Self {
+            ..Default::default()
+        }
+    }
+
     pub fn with_name(mut self, name: String) -> Self {
         self.name = Some(name);
         self

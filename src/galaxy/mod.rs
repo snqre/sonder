@@ -1,6 +1,6 @@
 use super::*;
+use ::strum::VariantArray;
 use location::*;
-use strum::VariantArray;
 
 static SPRITE_URLS: [Asset; 8] = [
     asset!("asset/location/galaxy-0.gif"),
@@ -17,7 +17,7 @@ pub trait CelestialBody {
     /// `1.0` means there is `100%` chance this will spawn
     fn spawn_multiplier(&self) -> f64;
     fn name(&self) -> &name::Name;
-    fn population(&self) -> &population::Population;
+    fn population(&self) -> Rbox<population::Population>;
 }
 
 pub struct Galaxy {
@@ -32,14 +32,24 @@ impl Galaxy {
         let choice: u16 = choice.round() as u16;
         let sprite_url: Asset = SPRITE_URLS[choice as usize];
         let name: name::Name = name::Name::random(name::Target::Galaxy);
-        let celestial_bodies: Vec<Box<dyn CelestialBody>> = vec!();
+        let mut celestial_bodies: Vec<Box<dyn CelestialBody>> = vec!();
         for _ in 0..=10 {
             let choice: f64 = name::Target::VARIANTS.len() as f64 * ::fastrand::f64();
             let choice: usize = choice.round() as usize;
             let target: name::Target = name::Target::VARIANTS[choice];
-            match target {
-                name::Target::Asteroid
-            }
+            let celestial_body: Box<dyn CelestialBody> = match target {
+                name::Target::Asteroid => Box::new(asteroid::Asteroid::new()),
+                name::Target::BlackHole | name::Target::Galaxy => Box::new(black_hole::BlackHole::new()),
+                name::Target::GasGiant => Box::new(gas_giant::GasGiant::new()),
+                name::Target::IceWorld => Box::new(ice_world::IceWorld::new()),
+                name::Target::Islands => Box::new(islands::Islands::new()),
+                name::Target::LavaWorld => Box::new(lava_world::LavaWorld::new()),
+                name::Target::NoAtmosphere => Box::new(no_atmosphere::NoAtmosphere::new()),
+                name::Target::Star => Box::new(star::Star::new()),
+                name::Target::TerranDry => Box::new(terran_dry::TerranDry::new()),
+                name::Target::TerranWet => Box::new(terran_wet::TerranWet::new())
+            };
+            celestial_bodies.push(celestial_body);
         }
         Self {
             name, 
@@ -52,11 +62,5 @@ impl Galaxy {
 impl common::Sprite for Galaxy {
     fn sprite_url(&self) -> Asset {
         self.sprite_url
-    }
-}
-
-impl common::Update for Galaxy {
-    fn update(&mut self) {
-        
     }
 }
