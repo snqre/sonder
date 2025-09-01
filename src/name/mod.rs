@@ -432,7 +432,7 @@ pub enum Name {
 }
 
 impl Name {
-    pub fn random(target: Target) -> Self {
+    pub fn new(target: Target) -> Self {
         for _ in 0..=64 {
             let adjective: String = Self::random_adjective(target);
             let noun: String = Self::random_prefix_and_suffix();
@@ -489,98 +489,25 @@ impl Name {
 
     fn random_adjective(target: Target) -> String {
         match target {
-            Target::Asteroid => {
-                let choice: f64 = AsteroidAdjective::COUNT as f64 * ::fastrand::f64();
-                let choice: u16 = choice.round() as u16;
-                let ret: AsteroidAdjective = AsteroidAdjective::VARIANTS[choice as usize];
-                let ret: String = ret.to_string();
-                ret
-            },
-            Target::BlackHole => {
-                let choice: f64 = BlackHoleAdjective::COUNT as f64 * ::fastrand::f64();
-                let choice: u16 = choice.round() as u16;
-                let ret: BlackHoleAdjective = BlackHoleAdjective::VARIANTS[choice as usize];
-                let ret: String = ret.to_string();
-                ret
-            },
-            Target::Galaxy => {
-                let choice: f64 = GalaxyAdjective::COUNT as f64 * ::fastrand::f64();
-                let choice: u16 = choice.round() as u16;
-                let ret: GalaxyAdjective = GalaxyAdjective::VARIANTS[choice as usize];
-                let ret: String = ret.to_string();
-                ret
-            },
-            Target::GasGiant => {
-                let choice: f64 = GasGiantAdjective::COUNT as f64 * ::fastrand::f64();
-                let choice: u16 = choice.round() as u16;
-                let ret: GasGiantAdjective = GasGiantAdjective::VARIANTS[choice as usize];
-                let ret: String = ret.to_string();
-                ret
-            },
-            Target::IceWorld => {
-                let choice: f64 = IceWorldAdjective::COUNT as f64 * ::fastrand::f64();
-                let choice: u16 = choice.round() as u16;
-                let ret: IceWorldAdjective = IceWorldAdjective::VARIANTS[choice as usize];
-                let ret: String = ret.to_string();
-                ret
-            },
-            Target::Islands => {
-                let choice: f64 = IslandsAdjective::COUNT as f64 * ::fastrand::f64();
-                let choice: u16 = choice.round() as u16;
-                let ret: IslandsAdjective = IslandsAdjective::VARIANTS[choice as usize];
-                let ret: String = ret.to_string();
-                ret
-            },
-            Target::LavaWorld => {
-                let choice: f64 = LavaWorldAdjective::COUNT as f64 * ::fastrand::f64();
-                let choice: u16 = choice.round() as u16;
-                let ret: LavaWorldAdjective = LavaWorldAdjective::VARIANTS[choice as usize];
-                let ret: String = ret.to_string();
-                ret
-            },
-            Target::NoAtmosphere => {
-                let choice: f64 = NoAtmosphereAdjective::COUNT as f64 * ::fastrand::f64();
-                let choice: u16 = choice.round() as u16;
-                let ret: NoAtmosphereAdjective = NoAtmosphereAdjective::VARIANTS[choice as usize];
-                let ret: String = ret.to_string();
-                ret
-            },
-            Target::Star => {
-                let choice: f64 = StarAdjective::COUNT as f64 * ::fastrand::f64();
-                let choice: u16 = choice.round() as u16;
-                let ret: StarAdjective = StarAdjective::VARIANTS[choice as usize];
-                let ret: String = ret.to_string();
-                ret
-            },
-            Target::TerranDry => {
-                let choice: f64 = TerranDryAdjective::COUNT as f64 * ::fastrand::f64();
-                let choice: u16 = choice.round() as u16;
-                let ret: TerranDryAdjective = TerranDryAdjective::VARIANTS[choice as usize];
-                let ret: String = ret.to_string();
-                ret
-            },
-            Target::TerranWet => {
-                let choice: f64 = TerranWetAdjective::COUNT as f64 * ::fastrand::f64();
-                let choice: u16 = choice.round() as u16;
-                let ret: TerranWetAdjective = TerranWetAdjective::VARIANTS[choice as usize];
-                let ret: String = ret.to_string();
-                ret
-            }
+            Target::Asteroid => AsteroidAdjective::VARIANTS[::fastrand::usize(0..AsteroidAdjective::COUNT)].to_string(),
+            Target::BlackHole => BlackHoleAdjective::VARIANTS[::fastrand::usize(0..BlackHoleAdjective::COUNT)].to_string(),
+            Target::Galaxy => GalaxyAdjective::VARIANTS[::fastrand::usize(0..GalaxyAdjective::COUNT)].to_string(),
+            Target::GasGiant => GasGiantAdjective::VARIANTS[::fastrand::usize(0..GasGiantAdjective::COUNT)].to_string(),
+            Target::IceWorld => IceWorldAdjective::VARIANTS[::fastrand::usize(0..IceWorldAdjective::COUNT)].to_string(),
+            Target::Islands => IslandsAdjective::VARIANTS[::fastrand::usize(0..IslandsAdjective::COUNT)].to_string(),
+            Target::LavaWorld => LavaWorldAdjective::VARIANTS[::fastrand::usize(0..LavaWorldAdjective::COUNT)].to_string(),
+            Target::NoAtmosphere => NoAtmosphereAdjective::VARIANTS[::fastrand::usize(0..NoAtmosphereAdjective::COUNT)].to_string(),
+            Target::Star => StarAdjective::VARIANTS[::fastrand::usize(0..StarAdjective::COUNT)].to_string(),
+            Target::TerranDry => TerranDryAdjective::VARIANTS[::fastrand::usize(0..TerranDryAdjective::COUNT)].to_string(),
+            Target::TerranWet => TerranWetAdjective::VARIANTS[::fastrand::usize(0..TerranWetAdjective::COUNT)].to_string()
         }
     }
 
     fn random_prefix_and_suffix() -> String {
-        let choice: f64 = Prefix::COUNT as f64 * ::fastrand::f64();
-        let choice: u16 = choice.round() as u16;
-        let prefix: Prefix = Prefix::VARIANTS[choice as usize];
-        let prefix: String = prefix.to_string();
-        let choice: f64 = Suffix::COUNT as f64 * ::fastrand::f64();
-        let choice: u16 = choice.round() as u16;
-        let suffix: Suffix = Suffix::VARIANTS[choice as usize];
-        let suffix: String = suffix.to_string();
+        let prefix: String = Prefix::VARIANTS[::fastrand::usize(0..Prefix::COUNT)].to_string();
+        let suffix: String = Suffix::VARIANTS[::fastrand::usize(0..Suffix::COUNT)].to_string();
         let mut ret: String = String::new();
         ret.push_str(&prefix);
-        ret.push(' ');
         ret.push_str(&suffix);
         ret
     }
@@ -590,6 +517,18 @@ impl ::std::ops::Deref for Name {
     type Target = str;
 
     fn deref(&self) -> &Self::Target {
-        &self
+        match self {
+            Self::Asteroid(s)
+            | Self::BlackHole(s)
+            | Self::Galaxy(s)
+            | Self::GasGiant(s)
+            | Self::IceWorld(s)
+            | Self::Islands(s) 
+            | Self::LavaWorld(s) 
+            | Self::NoAtmosphere(s)
+            | Self::Star(s)
+            | Self::TerranDry(s)
+            | Self::TerranWet(s) => s
+        }
     }
 }

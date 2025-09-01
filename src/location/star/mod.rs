@@ -10,7 +10,7 @@ static SPRITE_URLS: [Asset; 4] = [
 pub struct Star {
     sprite_url: Asset,
     name: name::Name,
-    population: Rbox<population::Population>
+    population: population::Population
 }
 
 impl Star {
@@ -18,19 +18,13 @@ impl Star {
         let choice: f64 = SPRITE_URLS.len() as f64 * ::fastrand::f64();
         let choice: usize = choice as usize;
         let sprite_url: Asset = SPRITE_URLS[choice];
-        let name: name::Name = name::Name::random(name::Target::Asteroid);
-        let population: Rbox<_> = population::Population::new(0, -1000.0);
+        let name: name::Name = name::Name::new(name::Target::Asteroid);
+        let population: population::Population = population::Population::new(0, -1000.0);
         Self {
             sprite_url,
             name,
             population
         }
-    }
-}
-
-impl common::Sprite for Star {
-    fn sprite_url(&self) -> Asset {
-        self.sprite_url
     }
 }
 
@@ -43,7 +37,19 @@ impl galaxy::CelestialBody for Star {
         &self.name
     }
 
-    fn population(&self) -> Rbox<population::Population> {
-        self.population.to_owned()
+    fn population(&self) -> &population::Population {
+        &self.population
+    }
+}
+
+impl common::Sprite for Star {
+    fn sprite_url(&self) -> Asset {
+        self.sprite_url
+    }
+}
+
+impl common::Update for Star {
+    fn update(&mut self) {
+        
     }
 }

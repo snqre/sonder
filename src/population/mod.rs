@@ -6,20 +6,10 @@ pub struct Population {
 }
 
 impl Population {
-    pub fn new(count: u128, growth_multiplier: f64) -> Rc<RefCell<Box<Self>>> {
-        let ret: Self = Self {
+    pub fn new(count: u128, growth_multiplier: f64) -> Self {
+        Self {
             count,
             growth_multiplier
-        };
-        let ret: Box<dyn engine::Tick> = Box::new(ret);
-        let ret: RefCell<_> = RefCell::new(ret);
-        let ret: Rc<_> = Rc::new(ret);
-        {
-            let ret: Rc<_> = ret.to_owned();
-            engine::register(ret);
-        }
-        unsafe { 
-            Rc::from_raw(Rc::into_raw(ret) as *const RefCell<Box<Self>>) 
         }
     }
 
@@ -32,7 +22,7 @@ impl Population {
     }
 }
 
-impl engine::Tick for Population {
+impl common::Update for Population {
     fn update(&mut self) {
         if self.growth_multiplier == 0.0 {
             return

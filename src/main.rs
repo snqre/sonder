@@ -3,13 +3,12 @@ use ::gloo_timers::callback as cb;
 use ::std::collections as ds;
 use ::std::rc::Rc;
 use ::std::cell::RefCell;
-
-use engine::Tick as _;
 use component::*;
+
+use crate::common::Update;
 
 mod common;
 mod component;
-mod engine;
 mod galaxy;
 mod location;
 mod market;
@@ -17,7 +16,9 @@ mod name;
 mod population;
 mod uuid;
 
-type Rbox<T> = Rc<RefCell<Box<T>>>;
+static GALAXY: GlobalSignal<galaxy::Galaxy> = GlobalSignal::new(|| {
+    galaxy::Galaxy::new()
+});
 
 #[derive(Debug)]
 #[derive(Clone)]
@@ -62,7 +63,7 @@ fn Home() -> Element {
             let _ = cb::Interval::new(1000, {
                 let mut points: Signal<_> = points.to_owned();
                 move || {
-                    engine::update();
+                    GALAXY.write().update();
                 }
             });
         }
@@ -82,6 +83,14 @@ fn Home() -> Element {
                 h: 200.0,
                 points: points()
             }
+            for celestial_body in GALAXY.read().celestial_bodies() {{
+                let name = celestial_body.name().to_string();
+                rsx!(
+                    div {
+                        { name }
+                    }
+                )
+            }}
         }
     )
 }

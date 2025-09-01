@@ -13,11 +13,13 @@ static SPRITE_URLS: [Asset; 8] = [
     asset!("asset/location/galaxy-7.gif")
 ];
 
-pub trait CelestialBody {
+pub trait CelestialBody 
+where
+    Self: common::Update {
     /// `1.0` means there is `100%` chance this will spawn
     fn spawn_multiplier(&self) -> f64;
     fn name(&self) -> &name::Name;
-    fn population(&self) -> Rbox<population::Population>;
+    fn population(&self) -> &population::Population;
 }
 
 pub struct Galaxy {
@@ -31,7 +33,7 @@ impl Galaxy {
         let choice: f64 = SPRITE_URLS.len() as f64 * ::fastrand::f64();
         let choice: u16 = choice.round() as u16;
         let sprite_url: Asset = SPRITE_URLS[choice as usize];
-        let name: name::Name = name::Name::random(name::Target::Galaxy);
+        let name: name::Name = name::Name::new(name::Target::Galaxy);
         let mut celestial_bodies: Vec<Box<dyn CelestialBody>> = vec!();
         for _ in 0..=10 {
             let choice: f64 = name::Target::VARIANTS.len() as f64 * ::fastrand::f64();
@@ -57,10 +59,26 @@ impl Galaxy {
             celestial_bodies
         }
     }
+
+    pub fn name(&self) -> &name::Name {
+        &self.name
+    }
+
+    pub fn celestial_bodies(&self) -> &Vec<Box<dyn CelestialBody>> {
+        &self.celestial_bodies
+    }
 }
 
 impl common::Sprite for Galaxy {
     fn sprite_url(&self) -> Asset {
         self.sprite_url
+    }
+}
+
+impl common::Update for Galaxy {
+    fn update(&mut self) {
+        for celestial_body in self.celestial_bodies.iter_mut() {
+            celestial_body.update();
+        }
     }
 }
