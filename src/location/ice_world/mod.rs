@@ -12,9 +12,8 @@ pub struct IceWorld {
 
 impl IceWorld {
     pub fn new() -> Self {
-        let choice: f64 = SPRITE_URLS.len() as f64 * ::fastrand::f64();
-        let choice: usize = choice as usize;
-        let sprite_url: Asset = SPRITE_URLS[choice];
+        let sprite_urls_len: usize = SPRITE_URLS.len();
+        let sprite_url: Asset = SPRITE_URLS[::fastrand::usize(0..sprite_urls_len)];
         let name: name::Name = name::Name::new(name::Target::Asteroid);
         let population: population::Population = population::Population::new(::fastrand::u128(1_000_000_000..=8_000_000_000), 1.0025);
         Self {

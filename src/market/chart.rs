@@ -4,8 +4,16 @@ use super::*;
 pub fn Chart(
     w: f64,
     h: f64,
-    points: Vec<(f64, f64)>
+    market: Signal<Market>
 ) -> Element {
+    let price_history: Vec<(f64, f64)> = market
+        .read()
+        .price_history()
+        .iter()
+        .enumerate()
+        .map(|(k, p)| (k as f64, *p))
+        .collect();
+
     rsx!(
         div {
             style: r#"
@@ -30,9 +38,9 @@ pub fn Chart(
                         stroke: #ffffff;
                         stroke-width: 2px;
                     "#,
-                    points: serialize_points(&points, w, h),
+                    points: serialize_points(&price_history, w, h),
                 }
-                for p in p_labels(&points, 8) {{
+                for p in p_labels(&price_history, 8) {{
                     let (
                         _,
                         _,
@@ -40,7 +48,7 @@ pub fn Chart(
                         _,
                         _,
                         p_range
-                    ) = parse_points(&points);
+                    ) = parse_points(&price_history);
                     let y: f64 = h - ((p - min_p) / p_range) * h;
                     rsx!(
                         text {
@@ -54,6 +62,27 @@ pub fn Chart(
                             x: w,
                             y,
                             "£{p:.2}"
+                        }
+                    )
+                }}
+            }
+            div {
+                style: r#"
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: center;
+                    align-items: center;
+                    font-size: 1em;
+                    font-family: {SF_PIXELATE};
+                    font-weight: normal;
+                "#,
+                {{
+                    let player_uuid: _ = uuid::PLAYER.read();
+                    let player_balance: f64 = market.read().balance_of(&player_uuid);
+                    let player_balance: String = format!("{:.2}", player_balance);
+                    rsx!(
+                        div {
+                            { player_balance }
                         }
                     )
                 }}

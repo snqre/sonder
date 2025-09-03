@@ -9,7 +9,8 @@ pub struct Builder {
     symbol: Option<String>,
     credit: Option<f64>,
     supply: Option<f64>,
-    uuid_to_balance: ds::HashMap<uuid::Uuid, f64>
+    uuid_to_balance: ds::HashMap<uuid::Uuid, f64>,
+    price_history: Option<Vec<f64>>
 }
 
 impl Builder {
@@ -56,6 +57,11 @@ impl Builder {
         self
     }
 
+    pub fn with_initial_price_history(mut self, history: Vec<f64>) -> Self {
+        self.price_history = Some(history);
+        self
+    }
+
     pub fn build(self) -> Option<Market> {
         Some(Market {
             uuid: self.uuid.unwrap_or_default(),
@@ -64,7 +70,8 @@ impl Builder {
             symbol: self.symbol?,
             total_credit: self.credit?,
             total_supply: self.supply?,
-            uuid_to_balance: self.uuid_to_balance
+            uuid_to_balance: self.uuid_to_balance,
+            price_history: self.price_history?
         })
     }
 }

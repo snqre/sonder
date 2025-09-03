@@ -1,24 +1,17 @@
 use ::dioxus::prelude::*;
 use ::gloo_timers::callback as cb;
 use ::std::collections as ds;
-use ::std::rc::Rc;
-use ::std::cell::RefCell;
-use component::*;
 
-use crate::common::Update;
+use ::reliq::array;
+use ::reliq::ops;
+use ::reliq::map;
+use ::reliq::q;
+use ::reliq::utf8;
 
-mod common;
-mod component;
-mod galaxy;
-mod location;
-mod market;
-mod name;
-mod population;
-mod uuid;
+mod engine;
+mod game;
 
-static GALAXY: GlobalSignal<galaxy::Galaxy> = GlobalSignal::new(|| {
-    galaxy::Galaxy::new()
-});
+static SF_PIXELATE: &str = "SF Pixelate";
 
 #[derive(Debug)]
 #[derive(Clone)]
@@ -38,34 +31,26 @@ fn main() {
 fn Main() -> Element {
     rsx! {
         document::Stylesheet { href: "/asset/main.css" }
+        link { rel: "stylesheet", href: "https://fonts.cdnfonts.com/css/sf-pixelate" }
         Router::<Route> {}
     }
 }
 
 #[component]
 fn Home() -> Element {
-    let points: Signal<Vec<(f64, f64)>> = use_signal(|| vec!(
-        (1.0, 2.0),
-        (2.0, 29.0),
-        (3.0, 42.0),
-        (4.0, 18.0),
-        (5.0, 29.0),
-        (6.0, 48.9),
-        (7.0, 182.9),
-        (8.0, 200.0),
-        (9.0, 190.0)
-    ));
-
     use_effect({
-        let points: Signal<_> = points.to_owned();
         move || {
-            let points: Signal<_> = points.to_owned();
-            let _ = cb::Interval::new(1000, {
-                let mut points: Signal<_> = points.to_owned();
-                move || {
-                    GALAXY.write().update();
-                }
+            game::spawn_logger();
+            game::spawn_population(game::PopulationConfiguration {
+                celestial_body: engine::Address::new_from_next(),
+                max_initial_count: 100000,
+                min_initial_count: 200000,
+                growth_multiplier: 1_01.into()
             });
+            engine::post(game::Event::Boot);
+            cb::Interval::new(1000, move || {
+                engine::post(game::Event::Tick);
+            }).forget();
         }
     });
 
@@ -76,21 +61,11 @@ fn Home() -> Element {
                 flex-direction: column;
                 justify-content: center;
                 align-items: center;
-                background: #FFFFFF;
+                min-width: 100vw;
+                min-height: 100vh;
+                background: #202020;
             "#,
-            Chart {
-                w: 500.0,
-                h: 200.0,
-                points: points()
-            }
-            for celestial_body in GALAXY.read().celestial_bodies() {{
-                let name = celestial_body.name().to_string();
-                rsx!(
-                    div {
-                        { name }
-                    }
-                )
-            }}
+
         }
     )
 }

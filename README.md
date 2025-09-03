@@ -23,3 +23,71 @@ To run for a different platform, use the `--platform platform` flag. E.g.
 dx serve --platform desktop
 ```
 
+
+
+            div {
+                {{
+                    let sprite_url = GALAXY.read().sprite_url();
+                    rsx!(
+                        div {
+                            style: r#"
+                                display: flex;
+                                flex-direction: column;
+                                justify-content: center;
+                                align-items: center;
+                                min-width: 128px;
+                                aspect-ratio: 1 / 1;
+                                background-image: url({sprite_url});
+                                background-size: contain;
+                                background-position-x: center;
+                                background-position-y: center;
+                                background-repeat: norepeat;
+                            "#
+                        }
+                    )
+                }}
+            }
+            for celestial_body in GALAXY.read().celestial_bodies() {{
+                let name: String = celestial_body.name().to_string();
+                let population: u128 = celestial_body.population().count();
+                let sprite_url: Asset = celestial_body.sprite_url();
+                rsx!(
+                    div {
+                        style: r#"
+                            display: flex;
+                            flex-direction: row;
+                            justify-content: center;
+                            align-items: center;
+                            cursor: pointer;
+                            user-select: none;
+                            border-width: 1px;
+                            border-style: solid;
+                            border-color: #37323E;
+                            border-radius: 4px;
+                            min-width: 200px;
+                        "#,
+                        div {
+                            style: r#"
+                                display: flex;
+                                flex-direction: column;
+                                justify-content: center;
+                                align-items: center;
+                                min-width: 64px;
+                                aspect-ratio: 1 / 1;
+                                background-image: url({sprite_url});
+                                background-size: contain;
+                                background-position-x: center;
+                                background-position-y: center;
+                                background-repeat: norepeat;
+                            "#
+                        }
+                        div {
+                            style: r#"
+                                display: flex;
+                                flex-direction: column;
+
+                            "#
+                        }
+                    }
+                )
+            }}
