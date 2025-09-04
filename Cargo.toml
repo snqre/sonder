@@ -17,6 +17,7 @@ dependencies.once_cell.version = "*"
 dependencies.serde.version = "*"
 dependencies.erased-serde.version = "*"
 dependencies.reliq.version = "*"
+dependencies.reliq.features = ["std"]
 dependencies.thiserror.version = "*"
 dependencies.web-sys.version = "*"
 dependencies.web-sys.optional = true

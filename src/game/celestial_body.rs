@@ -8,6 +8,51 @@ static ASTEROID_SPRITE_URLS: [Asset; 5] = [
     asset!("asset/location/asteroid-4.gif")
 ];
 
+static BLACK_HOLE_SPRITE_URLS: [Asset; 3] = [
+    asset!("asset/location/black-hole-0.gif"),
+    asset!("asset/location/black-hole-1.gif"),
+    asset!("asset/location/black-hole-2.gif")
+];
+
+static GAS_GIANT_SPRITE_URLS: [Asset; 1] = [
+    asset!("asset/location/gas-giant-0.gif"),
+];
+
+static ICE_WORLD_SPRITE_URLS: [Asset; 1] = [
+    asset!("asset/location/ice-world-0.gif"),
+];
+
+static ISLANDS_SPRITE_URLS: [Asset; 3] = [
+    asset!("asset/location/islands-0.gif"),
+    asset!("asset/location/islands-1.gif"),
+    asset!("asset/location/islands-2.gif"),
+];
+
+static LAVA_WORLD_SPRITE_URLS: [Asset; 1] = [
+    asset!("asset/location/lava-world-0.gif"),
+];
+
+static NO_ATMOSPHERE_SPRITE_URLS: [Asset; 1] = [
+    asset!("asset/location/no-atmosphere-0.gif"),
+];
+
+static STAR_SPRITE_URLS: [Asset; 4] = [
+    asset!("asset/location/star-0.gif"),
+    asset!("asset/location/star-1.gif"),
+    asset!("asset/location/star-2.gif"),
+    asset!("asset/location/star-3.gif")
+];
+
+static TERRAN_DRY_SPRITE_URLS: [Asset; 1] = [
+    asset!("asset/location/terran-dry-0.gif"),
+];
+
+static TERRAN_WET_SPRITE_URLS: [Asset; 3] = [
+    asset!("asset/location/terran-wet-0.gif"),
+    asset!("asset/location/terran-wet-1.gif"),
+    asset!("asset/location/terran-wet-2.gif")
+];
+
 #[repr(u8)]
 #[derive(Debug)]
 #[derive(Clone)]
@@ -403,7 +448,6 @@ enum Suffix {
 pub enum CelestialBody {
     Asteroid,
     BlackHole,
-    Galaxy,
     GasGiant,
     IceWorld,
     Islands,
@@ -415,26 +459,147 @@ pub enum CelestialBody {
 }
 
 pub fn spawn_celestial_body(celestial_body: Option<CelestialBody>) {
-    let m_port: u128 = next();
+    let m_origin: Address = Address::new_from_next();
     let m_celestial_body: CelestialBody = celestial_body.unwrap_or(random_celestial_body());
-    let m_name: String = random_name(m_celestial_body);
+    let m_name: utf8::Utf8<64> = random_name(m_celestial_body).try_into().unwrap();
+    let m_sprite_url: Asset = random_sprite_url(m_celestial_body);
 
-    spawn_population(
-        m_port,
-        0,
-        50000,
-        1_01.into()
-    );
+    match m_celestial_body {
+        CelestialBody::Asteroid => spawn_population(PopulationConfiguration {
+            celestial_body: m_origin,
+            max_initial_count: 0,
+            min_initial_count: 0,
+            growth_multiplier: (-1000_000000).into()
+        }),
+        CelestialBody::BlackHole => spawn_population(PopulationConfiguration {
+            celestial_body: m_origin,
+            max_initial_count: 0,
+            min_initial_count: 0,
+            growth_multiplier: (-1000_000000).into()
+        }),
+        CelestialBody::GasGiant => spawn_population(PopulationConfiguration {
+            celestial_body: m_origin,
+            max_initial_count: 0,
+            min_initial_count: 0,
+            growth_multiplier: (-1000_000000).into()
+        }),
+        CelestialBody::IceWorld => spawn_population(PopulationConfiguration {
+            celestial_body: m_origin,
+            max_initial_count: 3000000,
+            min_initial_count: 0,
+            growth_multiplier: (-1000_000000).into()
+        }),
+        CelestialBody::Islands => spawn_population(PopulationConfiguration {
+            celestial_body: m_origin,
+            max_initial_count: 8000000000,
+            min_initial_count: 1000000000,
+            growth_multiplier: (-1000_000000).into()
+        }),
+        CelestialBody::LavaWorld => spawn_population(PopulationConfiguration {
+            celestial_body: m_origin,
+            max_initial_count: 0,
+            min_initial_count: 0,
+            growth_multiplier: (-1000_000000).into()
+        }),
+        CelestialBody::NoAtmosphere => spawn_population(PopulationConfiguration {
+            celestial_body: m_origin,
+            max_initial_count: 0,
+            min_initial_count: 0,
+            growth_multiplier: (-1000_000000).into()
+        }),
+        CelestialBody::Star => spawn_population(PopulationConfiguration {
+            celestial_body: m_origin,
+            max_initial_count: 0,
+            min_initial_count: 0,
+            growth_multiplier: (-1000_000000).into()
+        }),
+        CelestialBody::TerranDry => spawn_population(PopulationConfiguration {
+            celestial_body: m_origin,
+            max_initial_count: 8000000000,
+            min_initial_count: 1000000000,
+            growth_multiplier: 1_000005.into()
+        }),
+        CelestialBody::TerranWet => spawn_population(PopulationConfiguration {
+            celestial_body: m_origin,
+            max_initial_count: 900000000,
+            min_initial_count: 200000000,
+            growth_multiplier: 1_000006.into()
+        })
+    };
 
-    on(Box::new(move |event| {
-        match event {
-            super::Event::Boot => post(Event::CelestialBodySpawn {
-                port: m_port,
-                name: m_name.to_string()
-            }),
-            _ => {}
+    super::Event::on(move |event| match event {
+        super::Event::Boot => vec!(super::Event::CelestialBodySpawn {
+            origin: m_origin,
+            sprite_url: m_sprite_url,
+            name: m_name.to_owned()
+        }),
+        _ => vec!()
+    });
+}
+
+fn random_sprite_url(celestial_body: CelestialBody) -> Asset {
+    match celestial_body {
+        CelestialBody::Asteroid => {
+            let ret: usize = ASTEROID_SPRITE_URLS.len();
+            let ret: usize = ::fastrand::usize(0..ret);
+            let ret: Asset = ASTEROID_SPRITE_URLS[ret];
+            ret
+        },
+        CelestialBody::BlackHole => {
+            let ret: usize = BLACK_HOLE_SPRITE_URLS.len();
+            let ret: usize = ::fastrand::usize(0..ret);
+            let ret: Asset = BLACK_HOLE_SPRITE_URLS[ret];
+            ret
+        },
+        CelestialBody::GasGiant => {
+            let ret: usize = GAS_GIANT_SPRITE_URLS.len();
+            let ret: usize = ::fastrand::usize(0..ret);
+            let ret: Asset = GAS_GIANT_SPRITE_URLS[ret];
+            ret
+        },
+        CelestialBody::IceWorld => {
+            let ret: usize = ICE_WORLD_SPRITE_URLS.len();
+            let ret: usize = ::fastrand::usize(0..ret);
+            let ret: Asset = ICE_WORLD_SPRITE_URLS[ret];
+            ret
+        },
+        CelestialBody::Islands => {
+            let ret: usize = ISLANDS_SPRITE_URLS.len();
+            let ret: usize = ::fastrand::usize(0..ret);
+            let ret: Asset = ISLANDS_SPRITE_URLS[ret];
+            ret
+        },
+        CelestialBody::LavaWorld => {
+            let ret: usize = LAVA_WORLD_SPRITE_URLS.len();
+            let ret: usize = ::fastrand::usize(0..ret);
+            let ret: Asset = LAVA_WORLD_SPRITE_URLS[ret];
+            ret
+        },
+        CelestialBody::NoAtmosphere => {
+            let ret: usize = NO_ATMOSPHERE_SPRITE_URLS.len();
+            let ret: usize = ::fastrand::usize(0..ret);
+            let ret: Asset = NO_ATMOSPHERE_SPRITE_URLS[ret];
+            ret
+        },
+        CelestialBody::Star => {
+            let ret: usize = STAR_SPRITE_URLS.len();
+            let ret: usize = ::fastrand::usize(0..ret);
+            let ret: Asset = STAR_SPRITE_URLS[ret];
+            ret
+        },
+        CelestialBody::TerranDry => {
+            let ret: usize = TERRAN_DRY_SPRITE_URLS.len();
+            let ret: usize = ::fastrand::usize(0..ret);
+            let ret: Asset = TERRAN_DRY_SPRITE_URLS[ret];
+            ret
+        },
+        CelestialBody::TerranWet => {
+            let ret: usize = TERRAN_WET_SPRITE_URLS.len();
+            let ret: usize = ::fastrand::usize(0..ret);
+            let ret: Asset = TERRAN_WET_SPRITE_URLS[ret];
+            ret
         }
-    }));
+    }
 }
 
 fn random_celestial_body() -> CelestialBody {
@@ -461,7 +626,6 @@ fn random_name_adjective(celestial_body: CelestialBody) -> String {
     match celestial_body {
         CelestialBody::Asteroid => AsteroidAdjective::VARIANTS[::fastrand::usize(0..AsteroidAdjective::COUNT)].to_string(),
         CelestialBody::BlackHole => BlackHoleAdjective::VARIANTS[::fastrand::usize(0..BlackHoleAdjective::COUNT)].to_string(),
-        CelestialBody::Galaxy => GalaxyAdjective::VARIANTS[::fastrand::usize(0..GalaxyAdjective::COUNT)].to_string(),
         CelestialBody::GasGiant => GasGiantAdjective::VARIANTS[::fastrand::usize(0..GasGiantAdjective::COUNT)].to_string(),
         CelestialBody::IceWorld => IceWorldAdjective::VARIANTS[::fastrand::usize(0..IceWorldAdjective::COUNT)].to_string(),
         CelestialBody::Islands => IslandsAdjective::VARIANTS[::fastrand::usize(0..IslandsAdjective::COUNT)].to_string(),
@@ -484,4 +648,3 @@ fn random_name_prefix_and_suffix() -> String {
     ret.push_str(&suffix);
     ret
 }
-

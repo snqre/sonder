@@ -2,13 +2,17 @@ use super::*;
 use super::engine::*;
 
 ::modwire::expose!(
-//    pub celestial_body
-//    pub galaxy
+    pub celestial_body
+    //pub galaxy
     pub logger
     pub market
     pub item
     pub population
 );
+
+static BUS: GlobalSignal<Bus<Event>> = GlobalSignal::new(|| {
+    Bus::default()
+});
 
 #[derive(Debug)]
 #[derive(Clone)]
@@ -17,18 +21,15 @@ pub enum Event {
     Boot,
     Tick,
 
-
     PopulationUpdate {
         origin: Address,
         celestial_body: Address,
         min_initial_count: u128,
         max_initial_count: u128,
-        growth_multiplier: q::Q6<u128>,
+        growth_multiplier: q::Q6<i128>,
         old_count: u128,
         new_count: u128
     },
-
-
 
 
 
@@ -87,11 +88,6 @@ pub enum Event {
         new_balance: q::Q2<u128>
     },
 
-
-
-
-
-
     InsufficientItemBalance {
         origin: Address,
         
@@ -104,5 +100,27 @@ pub enum Event {
         total_currency: q::Q2<u128>,
         price: q::Q2<u128>,
         price_history: array::Array<64, q::Q2<u128>>
+    },
+
+
+    CelestialBodySpawn {
+        origin: Address,
+        sprite_url: Asset,
+        name: utf8::Utf8<64>
+    }
+}
+
+impl Event {
+    pub fn post(self) {
+        BUS.write().post(self)
+    }
+
+    pub fn on<A, B>(mut on_event: A)
+    where
+        A: FnMut(&Self) -> B + 'static,
+        B: Into<Option<Vec<Self>>> {
+        BUS.write().on(move |event| {
+            on_event(event).into()
+        });
     }
 }

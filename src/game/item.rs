@@ -5,7 +5,7 @@ pub struct ItemConfiguration {
     pub description: utf8::Utf8<256>
 }
 
-pub fn spawn_item(c: ItemConfiguration) {
+pub fn spawn_item(c: ItemConfiguration) -> Address {
     let m_origin: Address = Address::new_from_next();
     let m_name: utf8::Utf8<64> = c.name;
     let m_description: utf8::Utf8<256> = c.description;
@@ -114,4 +114,6 @@ pub fn spawn_item(c: ItemConfiguration) {
         },
         _ => vec!()
     });
+
+    m_origin
 }
