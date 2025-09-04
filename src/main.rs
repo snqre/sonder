@@ -38,18 +38,24 @@ fn Main() -> Element {
 
 #[component]
 fn Home() -> Element {
-    use_effect({
-        move || {
+    use_future({
+        move || async move {
             game::spawn_logger();
             game::spawn_population(game::PopulationConfiguration {
                 celestial_body: engine::Address::new_from_next(),
-                max_initial_count: 100000,
-                min_initial_count: 200000,
-                growth_multiplier: 1_01.into()
+                max_initial_count: 200000,
+                min_initial_count: 100000,
+                growth_multiplier: 1_000010.into()
+            });
+            game::spawn_item(game::ItemConfiguration {
+                name: "Credit".try_into().unwrap(),
+                description: "Galactic unit of currency".try_into().unwrap()
             });
             engine::post(game::Event::Boot);
-            cb::Interval::new(1000, move || {
-                engine::post(game::Event::Tick);
+            cb::Interval::new(1000, {
+                move || {
+                    engine::post(game::Event::Tick);
+                }
             }).forget();
         }
     });

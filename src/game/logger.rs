@@ -6,6 +6,6 @@ pub fn spawn_logger() {
     on(|event| {
         let event: &wasm_bindgen::JsValue = &format!("{:?}", event).into();
         console::log_1(event);
-        vec![]
+        None
     });
 }

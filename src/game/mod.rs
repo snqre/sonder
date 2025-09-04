@@ -2,19 +2,22 @@ use super::*;
 use super::engine::*;
 
 ::modwire::expose!(
-    pub celestial_body
-    pub galaxy
+//    pub celestial_body
+//    pub galaxy
     pub logger
-    pub source
     pub market
+    pub item
     pub population
 );
 
 #[derive(Debug)]
 #[derive(Clone)]
 pub enum Event {
+    /// an event that is only fired at the start of the program.
     Boot,
     Tick,
+
+
     PopulationUpdate {
         origin: Address,
         celestial_body: Address,
@@ -24,27 +27,24 @@ pub enum Event {
         old_count: u128,
         new_count: u128
     },
-    ItemSpawn {
+
+
+
+
+
+    ItemUpdate {
         origin: Address,
+        source: Address,
         name: utf8::Utf8<64>,
-        description: utf8::Utf8<256>
+        description: utf8::Utf8<256>,
+        total_supply: q::Q2<u128>,
+        address_to_balance: Box<map::Map<256, Address, q::Q2<u128>>>
     },
     ItemTransferRequest {
         origin: Address,
-        sender: Address,
-        recipient: Address,
-        amount: q::Q2<u128>
-    },
-    ItemMintRequest {
-        origin: Address,
-        source: Address,
-        recipient: Address,
-        amount: q::Q2<u128>
-    },
-    ItemBurnRequest {
-        origin: Address,
         source: Address,
         sender: Address,
+        recipient: Address,
         amount: q::Q2<u128>
     },
     ItemTransfer {
@@ -60,6 +60,38 @@ pub enum Event {
         amount: q::Q2<u128>,
         total_supply: q::Q2<u128>
     },
+    ItemMintRequest {
+        origin: Address,
+        source: Address,
+        recipient: Address,
+        amount: q::Q2<u128>
+    },
+    ItemMint {
+        origin: Address,
+        source: Address,
+        recipient: Address,
+        old_balance: q::Q2<u128>,
+        new_balance: q::Q2<u128>
+    },
+    ItemBurnRequest {
+        origin: Address,
+        source: Address,
+        sender: Address,
+        amount: q::Q2<u128>
+    },
+    ItemBurn {
+        origin: Address,
+        source: Address,
+        sender: Address,
+        old_balance: q::Q2<u128>,
+        new_balance: q::Q2<u128>
+    },
+
+
+
+
+
+
     InsufficientItemBalance {
         origin: Address,
         

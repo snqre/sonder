@@ -1,31 +1,26 @@
-use super::*;
-
 pub struct Bus<T> {
-    event_handlers: Vec<Box<dyn FnMut(&T) -> Vec<T>>>
+    event_handlers: Vec<Box<dyn FnMut(&T) -> Option<Vec<T>>>>
 }
 
 impl<T> Bus<T> {
     pub fn post(&mut self, event: T) {
-        let mut events: Vec<T> = vec!();
+        let mut queue: Vec<T> = vec!();
         for on_event in self.event_handlers.iter_mut() {
-            let additional_events = on_event(&event);
-            for event in additional_events {
-                events.push(event);
+            if let Some(events) = on_event(&event) {
+                for event in events {
+                    queue.push(event);
+                }
             }
         }
-        for event in events {
+        for event in queue {
             self.post(event);
         }
     }
 
     pub fn on<A>(&mut self, on_event: A) 
     where
-        A: FnMut(&T) -> Vec<T> + 'static {
+        A: FnMut(&T) -> Option<Vec<T>> + 'static {
         self.event_handlers.push(Box::new(on_event));
-    }
-
-    pub fn filter() {
-
     }
 }
 

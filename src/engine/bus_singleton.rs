@@ -8,8 +8,11 @@ pub fn post(event: game::Event) {
     BUS.write().post(event);
 }
 
-pub fn on<T>(on_event: T) 
+pub fn on<A, B>(mut on_event: A) 
 where
-    T: FnMut(&game::Event) -> Vec<game::Event> + 'static {
-    BUS.write().on(on_event);
+    A: FnMut(&game::Event) -> B + 'static,
+    B: Into<Option<Vec<game::Event>>> {
+    BUS.write().on(move |event| {
+        on_event(event).into()
+    });
 }
