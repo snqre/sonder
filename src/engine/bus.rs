@@ -1,12 +1,17 @@
-pub struct Bus<T> {
-    event_handlers: Vec<Box<dyn FnMut(&T) -> Option<Vec<T>>>>
+pub trait Node {
+    type Event;
+    fn receive(&mut self, event: &Self::Event) -> Option<Vec<Self::Event>>;
 }
 
-impl<T> Bus<T> {
-    pub fn post(&mut self, event: T) {
-        let mut queue: Vec<T> = vec!();
-        for on_event in self.event_handlers.iter_mut() {
-            if let Some(events) = on_event(&event) {
+pub struct Bus<T> {
+    nodes: Vec<Box<dyn Node<Event = T>>>
+}
+
+impl<A> Bus<A> {
+    pub fn post(&mut self, event: A) {
+        let mut queue: Vec<A> = vec!();
+        for node in self.nodes.iter_mut() {
+            if let Some(events) = node.receive(&event) {
                 for event in events {
                     queue.push(event);
                 }
@@ -17,18 +22,18 @@ impl<T> Bus<T> {
         }
     }
 
-    pub fn on<A>(&mut self, on_event: A) 
+    pub fn connect<B>(&mut self, node: B)
     where
-        A: FnMut(&T) -> Option<Vec<T>> + 'static {
-        self.event_handlers.push(Box::new(on_event));
+        B: Node<Event = A> + 'static {
+        self.nodes.push(Box::new(node));
     }
 }
 
 impl<T> Default for Bus<T> {
     fn default() -> Self {
-        let event_handlers: Vec<_> = vec!();
+        let nodes: Vec<_> = vec!();
         Self {
-            event_handlers
+            nodes
         }
     }
 }

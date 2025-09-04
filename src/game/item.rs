@@ -12,7 +12,7 @@ pub fn spawn_item(c: ItemConfiguration) -> Address {
     let mut m_total_supply: q::Q2<u128> = q::as_0();
     let mut m_address_to_balance: Box<map::Map<256, Address, q::Q2<u128>>> = Box::new(map::Map::default());
 
-    on(move |event| match event {
+    super::Event::on(move |event| match event {
         super::Event::Boot => vec!(super::Event::ItemUpdate {
             origin: m_origin.to_owned(),
             source: m_origin.to_owned(),

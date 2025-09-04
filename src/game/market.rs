@@ -14,7 +14,7 @@ pub fn spawn_market(
     let mut m_price_history: array::Array<64, q::Q2<u128>> = array::Array::default();
     let mut m_address_to_balance: Box<map::Map<256, Address, q::Q2<u128>>> = Box::new(map::Map::default());
 
-    on(move |event| match event {
+    super::Event::on(move |event| match event {
         super::Event::Boot => {
             vec!(super::Event::ItemMintRequest {
                 origin: m_origin,
