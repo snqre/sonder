@@ -6,14 +6,6 @@ pub struct Bus<T> {
 }
 
 impl<A> Bus<A> {
-    pub fn new() -> Self {
-        let services: Vec<_> = vec!();
-        Self {
-            services,
-            next_service_id: 0.into()
-        }
-    }
-
     pub fn post(&mut self, event: A) {
         let mut queue: ds::VecDeque<_> = vec!(event).into();
         while let Some(event) = queue.pop_front() {
@@ -74,5 +66,15 @@ impl<A> Bus<A> {
         let one: ServiceId = 1.into();
         self.next_service_id = (*self.next_service_id + *one).into();
         ret
+    }
+}
+
+impl<T> Default for Bus<T> {
+    fn default() -> Self {
+        let services: Vec<_> = vec!();
+        Self {
+            services,
+            next_service_id: 0.into()
+        }
     }
 }

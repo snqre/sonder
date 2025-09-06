@@ -9,7 +9,6 @@ use ::reliq::q;
 use ::reliq::utf8;
 
 mod engine;
-mod game;
 
 static SF_PIXELATE: &str = "SF Pixelate";
 
@@ -39,21 +38,14 @@ fn Main() -> Element {
 #[component]
 fn Home() -> Element {
     use_future(|| async {
+        ::game::connect(::game::Logger);
         cb::Interval::new(1000, move || {
-            game::ENGINE.write().update();
+            ::game::post(::game::Event::DayTermination);
         }).forget();
-        cb::Interval::new(10, move || {
-            // tick-2
-        });
     });
-
-    let bus = use_bus();
 
     rsx!(
         div {
-            onclick: move |_| {
-                game::post()
-            },
             style: r#"
                 display: flex;
                 flex-direction: column;
@@ -62,8 +54,7 @@ fn Home() -> Element {
                 min-width: 100vw;
                 min-height: 100vh;
                 background: #202020;
-            "#,
-
+            "#
         }
     )
 }

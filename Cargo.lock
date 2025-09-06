@@ -1680,6 +1680,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "game"
+version = "0.1.0"
+dependencies = [
+ "dioxus",
+ "engine",
+ "modwire",
+ "web-sys",
+]
+
+[[package]]
 name = "gdk"
 version = "0.18.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4052,6 +4062,7 @@ dependencies = [
  "erased-serde",
  "fastrand",
  "futures-util",
+ "game",
  "gloo-timers",
  "modwire",
  "once_cell",

@@ -1,0 +1,8 @@
+package.name = "game"
+package.version = "0.1.0"
+package.edition = "2021"
+dependencies.dioxus.version = ">=0.6.0,<1.0.0"
+dependencies.modwire.version = ">=0.1.0,<1.0.0"
+dependencies.engine.version = "*"
+dependencies.engine.path = "../engine"
+dependencies.web-sys.version = "*"
