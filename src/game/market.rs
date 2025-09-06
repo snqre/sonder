@@ -38,12 +38,12 @@ impl Market {
 }
 
 impl engine::Service for Market {
-    type Event = Event;
+    type Event = Component;
 
     fn receive(&mut self, event: &Self::Event) -> Option<Vec<Self::Game>> {
         match event {
-            Event::Boot => Some(vec!(
-                Event::ItemMintRequest(ItemMintRequest({
+            Component::Boot => Some(vec!(
+                Component::ItemMintRequest(ItemMintRequest({
                     addr: self.addr,
                     item: self.supply,
                     to: self.addr,
@@ -58,13 +58,13 @@ impl engine::Service for Market {
                     on_completion: Box::new(move |outcome| outcome.unwrap())
                 }
             )),
-            Event::Tick => {
+            Component::Tick => {
                 if self.price_history_is_full() {
                     self.price_history.remove(0).unwrap();
                 }
-                Some(vec!(Event::MarketUpdate(self.to_owned())))
+                Some(vec!(Component::MarketUpdate(self.to_owned())))
             },
-            Event::ItemSpawn(item) => {
+            Component::ItemSpawn(item) => {
                 if item.addr == self.supply {
                     self.supply_snapshot = Some(item.to_owned())
                 }
@@ -73,7 +73,7 @@ impl engine::Service for Market {
                 }
                 None
             },
-            Event::ItemTransfer(ItemTransfer {
+            Component::ItemTransfer(ItemTransfer {
                 addr,
                 item,
                 sender,
@@ -90,7 +90,7 @@ impl engine::Service for Market {
                 
                 }
 
-                Some(vec!(Event::ItemTransferRequest {
+                Some(vec!(Component::ItemTransferRequest {
                     addr,
                     item,
                     from,
@@ -105,7 +105,7 @@ impl engine::Service for Market {
 
 
 
-            Event::MarketPurchaseRequest(request) => {
+            Component::MarketPurchaseRequest(request) => {
                 if request.market != self.addr {
                     return None
                 }
@@ -114,7 +114,7 @@ impl engine::Service for Market {
                 };
                 // post()
                 (request.amount * self.price().unwrap()).unwrap();
-                Some(vec!(Event::ItemTransferRequest(ItemTransferRequest {
+                Some(vec!(Component::ItemTransferRequest(ItemTransferRequest {
                     addr: self.addr,
                     item: self.supply,
                     from: self.addr,
@@ -123,12 +123,12 @@ impl engine::Service for Market {
                 })))
             },
 
-            Event::MarketPurchaseRequestStage2 => {
+            Component::MarketPurchaseRequestStage2 => {
 
             }
 
 
-            Event::MarketSaleRequest(request) => {
+            Component::MarketSaleRequest(request) => {
                 if request.market != self.addr {
                     return None
                 }
@@ -136,17 +136,17 @@ impl engine::Service for Market {
                 // 
 
                 let Some(price) = self.price() else {
-                    return Some(vec!(Event::MarketSaleRequestFailure()))
+                    return Some(vec!(Component::MarketSaleRequestFailure()))
                 };
                 let Some(supply_snapshot) = self.supply_snapshot else {
-                    return Some(vec!(Event::MarketSaleRequestFailure()))
+                    return Some(vec!(Component::MarketSaleRequestFailure()))
                 };
                 let Some(assets_snapshot) = self.assets_snapshot else {
-                    return Some(vec!(Event::MarketSaleRequestFailure()))
+                    return Some(vec!(Component::MarketSaleRequestFailure()))
                 };
                 let supply_balance: &q::Q2<_> = supply_snapshot.address_to_balance.get(&request.from).unwrap_or(&q::as_0());
                 if supply_balance < &request.amount {
-                    return Some(vec!(Event::MarketSaleRequestFailure()))
+                    return Some(vec!(Component::MarketSaleRequestFailure()))
                 }
                 let assets_out: q::Q2<_> = (request.amount * price).unwrap();
                 let market_assets_balance: &q::Q2<_> = assets_snapshot.address_to_balance.get(&self.addr).unwrap_or(&q::as_0());
@@ -156,22 +156,22 @@ impl engine::Service for Market {
                 self.total_supply = (self.total_supply + request.amount).unwrap();
                 self.total_assets = (self.total_assets - assets_out).unwrap();
                 Some(vec!(
-                    Event::ItemTransferRequest(ItemTransferRequest {
+                    Component::ItemTransferRequest(ItemTransferRequest {
                         addr: self.addr,
                         item: self.supply,
                         from: request.from,
                         to: self.addr,
                         amount: request.amount
                     }),
-                    Event::ItemTransferRequest(ItemTransferRequest {
+                    Component::ItemTransferRequest(ItemTransferRequest {
                         addr: self.addr,
                         item: self.assets,
                         from: self.addr,
                         to: request.from,
                         amount: assets_out
                     }),
-                    Event::MarketSale(self.to_owned()),
-                    Event::MarketUpdate(self.to_owned())
+                    Component::MarketSale(self.to_owned()),
+                    Component::MarketUpdate(self.to_owned())
                 ))
             },
             _ => None

@@ -8,6 +8,7 @@ use ::reliq::map;
 use ::reliq::q;
 use ::reliq::utf8;
 
+
 mod engine;
 mod game;
 
@@ -39,12 +40,8 @@ fn Main() -> Element {
 #[component]
 fn Home() -> Element {
     use_future(|| async {
-        game::connect(game::Logger);
-        game::connect(game::Population::new(engine::Address::new_from_next(), 8000000000, 1000000000, 1_000005.into()));
-        game::connect(game::Item::new("Credit", ""));
-        game::post(game::Event::Boot);
         cb::Interval::new(1000, move || {
-            game::post(game::Event::Tick)
+            game::ENGINE.write().update();
         }).forget();
     });
 

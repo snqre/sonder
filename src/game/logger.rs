@@ -4,7 +4,7 @@ use super::*;
 pub struct Logger;
 
 impl engine::Service for Logger {
-    type Event = Event;
+    type Event = Component;
 
     fn receive(&mut self, event: &Self::Event) -> Option<Vec<Self::Event>> {
         use ::web_sys::wasm_bindgen;
@@ -14,6 +14,3 @@ impl engine::Service for Logger {
         None
     }
 }
-
-// pattern
-// 
