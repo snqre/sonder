@@ -1,7 +1,7 @@
 use ::dioxus::prelude::*;
 use ::gloo_timers::callback as cb;
 use ::std::collections as ds;
-
+use ::std::sync;
 use ::reliq::array;
 use ::reliq::ops;
 use ::reliq::map;
@@ -41,9 +41,10 @@ fn Home() -> Element {
     use_future(|| async {
         game::connect(game::Logger);
         game::connect(game::Population::new(engine::Address::new_from_next(), 8000000000, 1000000000, 1_000005.into()));
+        game::connect(game::Item::new("Credit", ""));
         game::post(game::Event::Boot);
         cb::Interval::new(1000, move || {
-            game::post(game::Event::Tick);   
+            game::post(game::Event::Tick)
         }).forget();
     });
 

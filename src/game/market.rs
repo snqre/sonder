@@ -1,78 +1,180 @@
 use super::*;
 
-pub fn spawn_market(
-    supply_source: Address, 
-    currency_source: Address,
-    initial_liquidity: q::Q2<u128>,
-    initial_price: q::Q2<u128>) {
-    let m_origin: Address = Address::new_from_next();
-    let m_supply_source: Address = supply_source;
-    let m_currency_source: Address = currency_source;
-    let mut m_total_supply: q::Q2<u128> = q::as_0();
-    let mut m_total_currency: q::Q2<u128> = q::as_0();
-    let mut m_price: q::Q2<u128> = q::as_0();
-    let mut m_price_history: array::Array<64, q::Q2<u128>> = array::Array::default();
-    let mut m_address_to_balance: Box<map::Map<256, Address, q::Q2<u128>>> = Box::new(map::Map::default());
+#[derive(Debug)]
+#[derive(Clone)]
+pub struct Market {
+    pub addr: engine::Address,
+    pub supply: engine::Address,
+    pub supply_snapshot: Option<Item>,
+    pub assets: engine::Address,
+    pub assets_snapshot: Option<Item>,
+    pub initial_liquidity: q::Q2<u128>,
+    pub initial_price: q::Q2<u128>,
+    pub total_supply: q::Q2<u128>,
+    pub total_assets: q::Q2<u128>,
+    pub price_history: array::Array<64, q::Q2<u128>>
+}
 
-    super::Event::on(move |event| match event {
-        super::Event::Boot => {
-            vec!(super::Event::ItemMintRequest {
-                origin: m_origin,
-                source: m_supply_source,
-                recipient: m_origin,
-                amount: initial_liquidity
-            }, super::Event::ItemMintRequest {
-                origin: m_origin,
-                source: m_currency_source,
-                recipient: m_origin,
-                amount: (initial_liquidity * initial_price).unwrap()
-            })
-        },
-        super::Event::Tick => {
-            if m_price_history.len() >= m_price_history.cap() {
-                m_price_history.remove(0).unwrap();
+impl Market {
+    pub fn price(&self) -> Option<q::Q2<u128>> {
+        (self.total_assets / self.total_supply).ok()
+    }
+
+    pub fn price_history_is_full(&self) -> bool {
+        self.price_history.len() >= self.price_history.cap()
+    }
+
+    // pre-check
+    pub fn check_sale(&self) {
+        self.supply_snapshot
+            .to_owned()
+            .unwrap()
+            .will_transfer();
+        self.assets_snapshot
+            .to_owned()
+            .unwrap()
+            .will_transfer();
+    }
+}
+
+impl engine::Service for Market {
+    type Event = Event;
+
+    fn receive(&mut self, event: &Self::Event) -> Option<Vec<Self::Game>> {
+        match event {
+            Event::Boot => Some(vec!(
+                Event::ItemMintRequest(ItemMintRequest({
+                    addr: self.addr,
+                    item: self.supply,
+                    to: self.addr,
+                    amount: self.initial_liquidity,
+                    on_completion: Box::new(move |outcome| outcome.unwrap())
+                })),
+                Event::ItemMintRequest {
+                    addr: self.addr,
+                    item: self.assets,
+                    to: self.addr,
+                    amount: (self.initial_liquidity * self.initial_price).unwrap(),
+                    on_completion: Box::new(move |outcome| outcome.unwrap())
+                }
+            )),
+            Event::Tick => {
+                if self.price_history_is_full() {
+                    self.price_history.remove(0).unwrap();
+                }
+                Some(vec!(Event::MarketUpdate(self.to_owned())))
+            },
+            Event::ItemSpawn(item) => {
+                if item.addr == self.supply {
+                    self.supply_snapshot = Some(item.to_owned())
+                }
+                if item.addr == self.assets {
+                    self.assets_snapshot = Some(item.to_owned())
+                }
+                None
+            },
+            Event::ItemTransfer(ItemTransfer {
+                addr,
+                item,
+                sender,
+                recipient,
+                old_sender_balance,
+                old_recipient_balance,
+                new_sender_balance,
+                new_recipient_balance
+            }) => {
+                if recipient != &self.addr || (item != &self.supply || item != &self.assets) {
+                    return None
+                }
+                if item == &self.supply {
+                
+                }
+
+                Some(vec!(Event::ItemTransferRequest {
+                    addr,
+                    item,
+                    from,
+                    to,
+                    amount,
+                    on_completion: Box::new(|_| {
+                        
+                    })
+                }))
+            },
+
+
+
+
+            Event::MarketPurchaseRequest(request) => {
+                if request.market != self.addr {
+                    return None
+                }
+                let Some(price) = self.price() else {
+                    return None
+                };
+                // post()
+                (request.amount * self.price().unwrap()).unwrap();
+                Some(vec!(Event::ItemTransferRequest(ItemTransferRequest {
+                    addr: self.addr,
+                    item: self.supply,
+                    from: self.addr,
+                    to,
+                    amount
+                })))
+            },
+
+            Event::MarketPurchaseRequestStage2 => {
+
             }
-            m_price_history.push(m_price).unwrap();
-            vec!(super::Event::MarketUpdate {
-                origin: m_origin,
-                supply_source: m_supply_source,
-                currency_source: m_currency_source,
-                total_supply: m_total_supply,
-                total_currency: m_total_currency,
-                price: m_price,
-                price_history: m_price_history.to_owned()
-            })
-        },
-        super::Event::ItemTransfer {
-            origin,
-            sender,
-            recipient,
-            new_sender_balance,
-            new_recipient_balance,
-            amount,
-            ..
-        } => {
-            m_address_to_balance.insert(*sender, *new_sender_balance);
-            m_address_to_balance.insert(*recipient, *new_recipient_balance);
-            if origin == &m_supply_source {
-                m_total_supply = (m_total_supply + *amount).unwrap();
-            }
-            if origin == &m_currency_source {
-                m_total_currency = (m_total_currency + *amount).unwrap();
-            }
-            if m_total_supply > 0.into() {
-                m_price = (m_total_currency / m_total_supply).unwrap();
-            }
-            vec!(super::Event::MarketUpdate {
-                origin: m_origin,
-                supply_source: m_supply_source,
-                currency_source: m_currency_source,
-                total_supply: m_total_supply,
-                total_currency: m_total_currency,
-                price: m_price,
-                price_history: m_price_history.to_owned()
-            })
-        },
-        _ => vec!()
-    });
+
+
+            Event::MarketSaleRequest(request) => {
+                if request.market != self.addr {
+                    return None
+                }
+
+                // 
+
+                let Some(price) = self.price() else {
+                    return Some(vec!(Event::MarketSaleRequestFailure()))
+                };
+                let Some(supply_snapshot) = self.supply_snapshot else {
+                    return Some(vec!(Event::MarketSaleRequestFailure()))
+                };
+                let Some(assets_snapshot) = self.assets_snapshot else {
+                    return Some(vec!(Event::MarketSaleRequestFailure()))
+                };
+                let supply_balance: &q::Q2<_> = supply_snapshot.address_to_balance.get(&request.from).unwrap_or(&q::as_0());
+                if supply_balance < &request.amount {
+                    return Some(vec!(Event::MarketSaleRequestFailure()))
+                }
+                let assets_out: q::Q2<_> = (request.amount * price).unwrap();
+                let market_assets_balance: &q::Q2<_> = assets_snapshot.address_to_balance.get(&self.addr).unwrap_or(&q::as_0());
+                if market_assets_balance < &assets_out {
+                    panic!("...")
+                }
+                self.total_supply = (self.total_supply + request.amount).unwrap();
+                self.total_assets = (self.total_assets - assets_out).unwrap();
+                Some(vec!(
+                    Event::ItemTransferRequest(ItemTransferRequest {
+                        addr: self.addr,
+                        item: self.supply,
+                        from: request.from,
+                        to: self.addr,
+                        amount: request.amount
+                    }),
+                    Event::ItemTransferRequest(ItemTransferRequest {
+                        addr: self.addr,
+                        item: self.assets,
+                        from: self.addr,
+                        to: request.from,
+                        amount: assets_out
+                    }),
+                    Event::MarketSale(self.to_owned()),
+                    Event::MarketUpdate(self.to_owned())
+                ))
+            },
+            _ => None
+        }
+    }
 }

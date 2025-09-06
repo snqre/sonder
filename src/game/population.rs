@@ -29,13 +29,16 @@ impl Population {
     }
 }
 
-impl engine::Node for Population {
+impl engine::Service for Population {
     type Event = Event;
 
     fn receive(&mut self, event: &Self::Event) -> Option<Vec<Self::Event>> {
         use ::reliq::ops::ToPrim as _;
         match event {
-            Event::Boot => Some(vec!(Event::PopulationUpdate(self.to_owned()))),
+            Event::Boot => Some(vec!(
+                Event::PopulationSpawn(self.to_owned()),
+                Event::PopulationUpdate(self.to_owned())
+            )),
             Event::Tick => {
                 let count: i128 = self.count.try_into().unwrap();
                 let count: q::Q6<i128> = (count * 1_000000).into();
@@ -43,14 +46,6 @@ impl engine::Node for Population {
                 let count: u128 = count.to_u128().unwrap();
                 self.count = count;
                 Some(vec!(Event::PopulationUpdate(self.to_owned())))
-            },
-            Event::CelestialBodyUpdate() => {
-                // check any event from the celestial body you live on
-                None
-            },
-            Event::MarketUpdate() => {
-                // check market on celestial body you live on
-                None
             },
             _ => None
         }

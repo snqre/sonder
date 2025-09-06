@@ -3,7 +3,7 @@ use super::*;
 #[repr(transparent)]
 pub struct Logger;
 
-impl engine::Node for Logger {
+impl engine::Service for Logger {
     type Event = Event;
 
     fn receive(&mut self, event: &Self::Event) -> Option<Vec<Self::Event>> {
@@ -14,3 +14,6 @@ impl engine::Node for Logger {
         None
     }
 }
+
+// pattern
+// 
