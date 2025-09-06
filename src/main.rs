@@ -8,7 +8,6 @@ use ::reliq::map;
 use ::reliq::q;
 use ::reliq::utf8;
 
-
 mod engine;
 mod game;
 
@@ -43,10 +42,18 @@ fn Home() -> Element {
         cb::Interval::new(1000, move || {
             game::ENGINE.write().update();
         }).forget();
+        cb::Interval::new(10, move || {
+            // tick-2
+        });
     });
+
+    let bus = use_bus();
 
     rsx!(
         div {
+            onclick: move |_| {
+                game::post()
+            },
             style: r#"
                 display: flex;
                 flex-direction: column;

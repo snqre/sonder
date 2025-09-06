@@ -17,7 +17,7 @@ impl<A> Bus<A> {
 
     pub fn post(&mut self, event: A) {
         let mut queue: Vec<_> = vec!();
-        for service in self.services.iter_mut() {
+        for service in (*self).services.iter_mut() {
             if let Some(events) = service.receive(&event) {
                 for event in events {
                     queue.push(event);

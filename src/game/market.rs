@@ -48,20 +48,20 @@ impl engine::Service for Market {
                     item: self.supply,
                     to: self.addr,
                     amount: self.initial_liquidity,
-                    on_completion: Box::new(move |outcome| outcome.unwrap())
+                
                 })),
                 Event::ItemMintRequest {
                     addr: self.addr,
                     item: self.assets,
                     to: self.addr,
                     amount: (self.initial_liquidity * self.initial_price).unwrap(),
-                    on_completion: Box::new(move |outcome| outcome.unwrap())
                 }
             )),
             Component::Tick => {
                 if self.price_history_is_full() {
                     self.price_history.remove(0).unwrap();
                 }
+                // add a the price to it
                 Some(vec!(Component::MarketUpdate(self.to_owned())))
             },
             Component::ItemSpawn(item) => {

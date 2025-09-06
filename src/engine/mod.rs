@@ -9,6 +9,7 @@ use super::*;
 pub trait Rule {
     type Component;
 
+    // groupings, filters
     fn apply(&self, components: &mut Vec::<Self::Component>);
 }
 
