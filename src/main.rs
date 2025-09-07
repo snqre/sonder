@@ -37,12 +37,18 @@ fn Main() -> Element {
 
 #[component]
 fn Home() -> Element {
-    use_future(|| async {
-        ::game::connect(::game::Logger);
-        ::game::connect_package(::game::Asteroid::new());
+    use_effect(|| {
         let mut day: ::game::Day = 1;
+        let (_, asteroid) = ::game::Asteroid::new();
+        ::game::lock(|b| {
+            b.connect(::game::Logger);
+            b.connect(asteroid);
+            b.post(::game::Event::Boot);
+        });
         cb::Interval::new(1000, move || {
-            ::game::post(::game::Event::DayTermination(day));
+            ::game::lock(|b| {
+                b.post(::game::Event::DayTermination(day));
+            });
             day += 1;
         }).forget();
     });

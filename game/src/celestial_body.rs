@@ -6,10 +6,6 @@ where
 
 }
 
-static GAS_GIANT_SPRITE_URLS: [Asset; 1] = [
-    asset!("asset/location/gas-giant-0.gif"),
-];
-
 static ICE_WORLD_SPRITE_URLS: [Asset; 1] = [
     asset!("asset/location/ice-world-0.gif"),
 ];

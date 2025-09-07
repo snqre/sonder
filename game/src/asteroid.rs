@@ -11,16 +11,17 @@ static SPRITE_URLS: [Asset; 5] = [
 #[derive(Debug)]
 #[derive(Clone)]
 pub struct Asteroid {
-    id: ::engine::ServiceId,
-    population: Option<::engine::ServiceId>,
+    addr: Address,
+    population: Option<Address>,
     sprite_url: Asset
 }
 
 impl Asteroid {
-    pub fn new() -> ::engine::ServicePackage<Event> {
-        let ret_id: ::engine::ServiceId = gen_service_id();
+    pub fn new() -> Service<Self> {
         let ret: Self = Self {
-            id: gen_service_id(),
+            addr: lock_env(|env| {
+                env.claim_address()
+            }),
             population: None,
             sprite_url: SPRITE_URLS[{
                 let ret: usize = SPRITE_URLS.len();
@@ -28,19 +29,13 @@ impl Asteroid {
                 ret
             }]
         };
-        (ret_id, ret).into()
+        (ret.addr, ret)
     }
 }
 
 impl ::engine::Sprite for Asteroid {
     fn sprite_url(&self) -> Asset {
         self.sprite_url
-    }
-}
-
-impl ::engine::Identity for Asteroid {
-    fn id(&self) -> &engine::ServiceId {
-        &self.id
     }
 }
 
@@ -57,11 +52,10 @@ impl ::engine::Service for Asteroid {
                     self.to_owned()
                 }))),
                 ::engine::Effect::Spawn({
-                    let id = self.id().to_owned();
                     let population_growth_multiplier: q::Q6<_> = (-1000_000000).into();
-                    let (population_id, population) = Population::new(id, 0, 0, population_growth_multiplier).unpack();
+                    let (population_id, population) = Population::new(self.addr, 0, 0, population_growth_multiplier);
                     self.population = Some(population_id);
-                    population
+                    Box::new(population)
                 })
             )),
             _ => ::engine::Effect::None

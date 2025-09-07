@@ -4,37 +4,32 @@ use super::*;
 #[derive(Clone)]
 #[derive(Copy)]
 pub struct Population {
-    id: ::engine::ServiceId,
-    celestial_body: ::engine::ServiceId,
+    addr: Address,
+    celestial_body: Address,
     growth_multiplier: q::Q6<i128>,
     count: u128
 }
 
 impl Population {
     pub fn new(
-        celestial_body: ::engine::ServiceId,
+        celestial_body: Address,
         min_initial_count: u128,
         max_initial_count: u128,
         growth_multiplier: q::Q6<i128>
-    ) -> ::engine::ServicePackage<Event> {
-        let ret_id: ::engine::ServiceId = gen_service_id();
+    ) -> Service<Self> {
         let ret: Self = Self {
-            id: gen_service_id(),
+            addr: lock_env(|env| {
+                env.claim_address()
+            }),
             celestial_body,
             growth_multiplier,
             count: ::fastrand::u128(min_initial_count..=max_initial_count)
         };
-        (ret_id, ret).into()
+        (ret.addr, ret)
     }
 
-    pub fn celestial_body(&self) -> &::engine::ServiceId {
+    pub fn celestial_body(&self) -> &Address {
         &self.celestial_body
-    }
-}
-
-impl ::engine::Identity for Population {
-    fn id(&self) -> &::engine::ServiceId {
-        &self.id
     }
 }
 

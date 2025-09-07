@@ -9,16 +9,17 @@ static SPRITE_URLS: [Asset; 3] = [
 #[derive(Debug)]
 #[derive(Clone)]
 pub struct BlackHole {
-    id: ::engine::ServiceId,
-    population: Option<::engine::ServiceId>,
+    addr: Address,
+    population: Option<Address>,
     sprite_url: Asset
 }
 
 impl BlackHole {
-    pub fn new() -> ::engine::ServicePackage<Event> {
-        let ret_id: ::engine::ServiceId = gen_service_id();
+    pub fn new() -> Service<Self> {
         let ret: Self = Self {
-            id: ret_id,
+            addr: lock_env(|b| {
+                b.claim_address()
+            }),
             population: None,
             sprite_url: SPRITE_URLS[{
                 let ret: usize = SPRITE_URLS.len();
@@ -26,19 +27,19 @@ impl BlackHole {
                 ret
             }]
         };
-        (ret_id, ret).into()
+        (ret.addr, ret)
+    }
+}
+
+impl Identity for BlackHole {
+    fn address(&self) -> &Address {
+        &self.addr
     }
 }
 
 impl ::engine::Sprite for BlackHole {
     fn sprite_url(&self) -> Asset {
         self.sprite_url
-    }
-}
-
-impl ::engine::Identity for BlackHole {
-    fn id(&self) -> &engine::ServiceId {
-        &self.id
     }
 }
 
@@ -55,11 +56,10 @@ impl ::engine::Service for BlackHole {
                     self.to_owned()
                 }))),
                 ::engine::Effect::Spawn({
-                    let id = self.id().to_owned();
                     let population_growth_multiplier: q::Q6<_> = (-1000_000000).into();
-                    let (population_id, population) = Population::new(id, 0, 0, population_growth_multiplier).unpack();
+                    let (population_id, population) = Population::new(self.addr, 0, 0, population_growth_multiplier);
                     self.population = Some(population_id);
-                    population
+                    Box::new(population)
                 })
             )),
             _ => ::engine::Effect::None

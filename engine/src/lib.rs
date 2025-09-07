@@ -1,5 +1,3 @@
-#![deny(warnings)]
-
 use ::dioxus::prelude::Asset;
 use ::std::collections as ds;
 use ::std::ops;

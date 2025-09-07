@@ -1,22 +1,26 @@
 use super::*;
 
+static SPRITE_URLS: [Asset; 1] = [
+    asset!("asset/location/gas-giant-0.gif"),
+];
+
 #[derive(Debug)]
 #[derive(Clone)]
 pub struct GasGiant {
-    id: ::engine::ServiceId,
-    population: ::engine::ServiceId,
+    address: Address,
+    population: Option<Address>,
     sprite_url: Asset
+}
+
+impl Identity for GasGiant {
+    fn address(&self) -> &Address {
+        &self.address
+    }
 }
 
 impl ::engine::Sprite for GasGiant {
     fn sprite_url(&self) -> Asset {
         self.sprite_url
-    }
-}
-
-impl ::engine::Identity for GasGiant {
-    fn id(&self) -> &engine::ServiceId {
-        &self.id
     }
 }
 
@@ -30,11 +34,11 @@ impl ::engine::Service for GasGiant {
                     self.to_owned()
                 }))),
                 ::engine::Effect::Spawn({
-                    let id = self.id().to_owned();
                     let growth_multiplier: q::Q6<_> = (-1000_000000).into();
-                    let (population_id, population) = Population::new(id, 0, 0, growth_multiplier).unpack();
-                    self.population = population_id;
-                    population
+                    let (ret_address, ret) = Population::new(self.address, 0, 0, growth_multiplier);
+                    let ret: Box<_> = Box::new(ret);
+                    self.population = Some(ret_address);
+                    ret
                 })
             )),
             _ => ::engine::Effect::None
