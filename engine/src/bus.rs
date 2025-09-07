@@ -39,6 +39,15 @@ impl<A> Bus<A> {
         }
     }
 
+    pub fn connect_package<B>(&mut self, package: B) -> ServiceId
+    where
+        B: Into<ServicePackage<A>> {
+        let package: ServicePackage<A> = package.into();
+        let (service_id, service) = package.unpack();
+        self.services.push((service_id, service));
+        service_id
+    }
+
     pub fn connect_boxed(&mut self, service: Box<dyn Service<Event = A>>) -> ServiceId {
         let service_id: ServiceId = self.gen_service_id();
         self.services.push((service_id, service));
@@ -61,7 +70,7 @@ impl<A> Bus<A> {
         });
     }
 
-    fn gen_service_id(&mut self) -> ServiceId {
+    pub fn gen_service_id(&mut self) -> ServiceId {
         let ret: ServiceId = self.next_service_id;
         let one: ServiceId = 1.into();
         self.next_service_id = (*self.next_service_id + *one).into();

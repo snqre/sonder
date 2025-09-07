@@ -39,8 +39,11 @@ fn Main() -> Element {
 fn Home() -> Element {
     use_future(|| async {
         ::game::connect(::game::Logger);
+        ::game::connect_package(::game::Asteroid::new());
+        let mut day: ::game::Day = 1;
         cb::Interval::new(1000, move || {
-            ::game::post(::game::Event::DayTermination);
+            ::game::post(::game::Event::DayTermination(day));
+            day += 1;
         }).forget();
     });
 
